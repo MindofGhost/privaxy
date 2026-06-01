@@ -1,4 +1,5 @@
 use super::html_rewriter::Rewriter;
+use super::upstream::UpstreamProxy;
 use crate::blocker::AdblockRequester;
 use crate::events::Event;
 use crate::statistics::Statistics;
@@ -10,7 +11,13 @@ use hyper::client::HttpConnector;
 use hyper::{http, Body, Request, Response};
 use hyper_rustls::HttpsConnector;
 use std::net::IpAddr;
+use std::pin::Pin;
+use std::task::{Context, Poll};
+use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, ReadBuf};
+use tokio::net::TcpStream;
 use tokio::sync::broadcast;
+use tokio_rustls::client::TlsStream;
+use tokio_rustls::TlsConnector;
 
 #[allow(clippy::too_many_arguments)]
 pub(crate) async fn serve(
@@ -23,6 +30,7 @@ pub(crate) async fn serve(
     broadcast_sender: broadcast::Sender<Event>,
     statistics: Statistics,
     client_ip_address: IpAddr,
+    upstream_proxy: Option<UpstreamProxy>,
 ) -> Result<Response<Body>, hyper::Error> {
     let scheme_string = scheme.to_string();
 
@@ -42,7 +50,10 @@ pub(crate) async fn serve(
     };
 
     if request.headers().contains_key(http::header::UPGRADE) {
-        return Ok(perform_two_ends_upgrade(request, uri, hyper_client).await);
+        return Ok(match upstream_proxy {
+            Some(upstream_proxy) => perform_proxied_upgrade(request, uri, upstream_proxy).await,
+            None => perform_two_ends_upgrade(request, uri, hyper_client).await,
+        });
     }
 
     let (mut parts, body) = request.into_parts();
@@ -246,4 +257,272 @@ async fn perform_two_ends_upgrade(
     }
 
     new_response
+}
+
+enum ServerStream {
+    Tcp(TcpStream),
+    Tls(TlsStream<TcpStream>),
+}
+
+impl AsyncRead for ServerStream {
+    fn poll_read(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut ReadBuf<'_>,
+    ) -> Poll<std::io::Result<()>> {
+        match &mut *self {
+            Self::Tcp(stream) => Pin::new(stream).poll_read(cx, buf),
+            Self::Tls(stream) => Pin::new(stream).poll_read(cx, buf),
+        }
+    }
+}
+
+impl AsyncWrite for ServerStream {
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<std::io::Result<usize>> {
+        match &mut *self {
+            Self::Tcp(stream) => Pin::new(stream).poll_write(cx, buf),
+            Self::Tls(stream) => Pin::new(stream).poll_write(cx, buf),
+        }
+    }
+
+    fn poll_flush(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<std::io::Result<()>> {
+        match &mut *self {
+            Self::Tcp(stream) => Pin::new(stream).poll_flush(cx),
+            Self::Tls(stream) => Pin::new(stream).poll_flush(cx),
+        }
+    }
+
+    fn poll_shutdown(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<std::io::Result<()>> {
+        match &mut *self {
+            Self::Tcp(stream) => Pin::new(stream).poll_shutdown(cx),
+            Self::Tls(stream) => Pin::new(stream).poll_shutdown(cx),
+        }
+    }
+}
+
+async fn perform_proxied_upgrade(
+    request: Request<Body>,
+    uri: Uri,
+    upstream_proxy: UpstreamProxy,
+) -> Response<Body> {
+    let authority = match authority_with_default_port(&uri) {
+        Some(authority) => authority,
+        None => return get_empty_response(http::StatusCode::BAD_REQUEST),
+    };
+
+    let mut server = match upstream_proxy.connect_tunnel(&authority).await {
+        Ok(stream) => match uri.scheme() {
+            Some(scheme) if scheme == &Scheme::HTTPS => {
+                let host = match uri.host() {
+                    Some(host) => host,
+                    None => return get_empty_response(http::StatusCode::BAD_REQUEST),
+                };
+
+                match connect_tls(stream, host).await {
+                    Ok(stream) => ServerStream::Tls(stream),
+                    Err(err) => {
+                        log::debug!("Unable to establish TLS through upstream proxy: {}", err);
+                        return get_empty_response(http::StatusCode::BAD_GATEWAY);
+                    }
+                }
+            }
+            _ => ServerStream::Tcp(stream),
+        },
+        Err(err) => {
+            log::debug!("Unable to CONNECT through upstream proxy: {}", err);
+            return get_empty_response(http::StatusCode::BAD_GATEWAY);
+        }
+    };
+
+    let mut upgrade_request = format!(
+        "{} {} HTTP/1.1\r\n",
+        request.method(),
+        uri.path_and_query()
+            .map(|path_and_query| path_and_query.as_str())
+            .unwrap_or("/")
+    );
+
+    let mut has_host = false;
+    for (name, value) in request.headers() {
+        if name == http::header::HOST {
+            has_host = true;
+        }
+
+        if name == http::header::PROXY_AUTHORIZATION {
+            continue;
+        }
+
+        let value = match value.to_str() {
+            Ok(value) => value,
+            Err(_) => return get_empty_response(http::StatusCode::BAD_REQUEST),
+        };
+
+        upgrade_request.push_str(name.as_str());
+        upgrade_request.push_str(": ");
+        upgrade_request.push_str(value);
+        upgrade_request.push_str("\r\n");
+    }
+
+    if !has_host {
+        upgrade_request.push_str("Host: ");
+        upgrade_request.push_str(authority.as_str());
+        upgrade_request.push_str("\r\n");
+    }
+
+    upgrade_request.push_str("\r\n");
+
+    if let Err(err) = server.write_all(upgrade_request.as_bytes()).await {
+        log::debug!("Unable to send upgrade through upstream proxy: {}", err);
+        return get_empty_response(http::StatusCode::BAD_GATEWAY);
+    }
+
+    let (response_bytes, pending_server_bytes) = match read_headers(&mut server).await {
+        Ok(response) => response,
+        Err(err) => {
+            log::debug!("Unable to read upgrade response through upstream proxy: {}", err);
+            return get_empty_response(http::StatusCode::BAD_GATEWAY);
+        }
+    };
+
+    let new_response = match parse_upgrade_response(&response_bytes) {
+        Ok(response) => response,
+        Err(err) => {
+            log::debug!("Unable to parse upgrade response through upstream proxy: {}", err);
+            return get_empty_response(http::StatusCode::BAD_GATEWAY);
+        }
+    };
+
+    tokio::spawn(async move {
+        match hyper::upgrade::on(request).await {
+            Ok(mut upgraded_client) => {
+                if !pending_server_bytes.is_empty()
+                    && upgraded_client.write_all(&pending_server_bytes).await.is_err()
+                {
+                    return;
+                }
+
+                let _result =
+                    tokio::io::copy_bidirectional(&mut upgraded_client, &mut server).await;
+            }
+            Err(e) => {
+                log::debug!("Unable to upgrade: {}", e)
+            }
+        }
+    });
+
+    new_response
+}
+
+async fn connect_tls(stream: TcpStream, host: &str) -> std::io::Result<TlsStream<TcpStream>> {
+    let mut root_cert_store = rustls::RootCertStore::empty();
+
+    for certificate in rustls_native_certs::load_native_certs()
+        .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?
+    {
+        let _result = root_cert_store.add(&rustls::Certificate(certificate.0));
+    }
+
+    let config = rustls::ClientConfig::builder()
+        .with_safe_defaults()
+        .with_root_certificates(root_cert_store)
+        .with_no_client_auth();
+    let connector = TlsConnector::from(std::sync::Arc::new(config));
+    let server_name = rustls::ServerName::try_from(host)
+        .map_err(|_| std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid DNS name"))?;
+
+    connector.connect(server_name, stream).await
+}
+
+async fn read_headers(stream: &mut ServerStream) -> std::io::Result<(Vec<u8>, Vec<u8>)> {
+    let mut response = Vec::new();
+    let mut buffer = [0; 1024];
+
+    loop {
+        let bytes_read = stream.read(&mut buffer).await?;
+        if bytes_read == 0 {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::UnexpectedEof,
+                "server closed upgrade response",
+            ));
+        }
+
+        response.extend_from_slice(&buffer[..bytes_read]);
+
+        if let Some(header_end) = response
+            .windows(4)
+            .position(|window| window == b"\r\n\r\n")
+            .map(|position| position + 4)
+        {
+            let pending_server_bytes = response.split_off(header_end);
+            return Ok((response, pending_server_bytes));
+        }
+
+        if response.len() > 8192 {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "upgrade response is too large",
+            ));
+        }
+    }
+}
+
+fn parse_upgrade_response(response_bytes: &[u8]) -> Result<Response<Body>, String> {
+    let response = std::str::from_utf8(response_bytes).map_err(|err| err.to_string())?;
+    let mut lines = response.split("\r\n");
+    let status_line = lines
+        .next()
+        .ok_or_else(|| "upgrade response is empty".to_string())?;
+    let status_code = status_line
+        .split_whitespace()
+        .nth(1)
+        .ok_or_else(|| "upgrade response status code is missing".to_string())?
+        .parse::<u16>()
+        .map_err(|err| err.to_string())?;
+
+    let mut builder = Response::builder().status(status_code);
+
+    for line in lines {
+        if line.is_empty() {
+            break;
+        }
+
+        let Some((name, value)) = line.split_once(':') else {
+            continue;
+        };
+
+        builder = builder.header(name.trim(), value.trim());
+    }
+
+    builder.body(Body::empty()).map_err(|err| err.to_string())
+}
+
+fn authority_with_default_port(uri: &Uri) -> Option<Authority> {
+    let authority = uri.authority()?;
+
+    if authority.port().is_some() {
+        return Some(authority.clone());
+    }
+
+    let port = match uri.scheme() {
+        Some(scheme) if scheme == &Scheme::HTTPS => 443,
+        _ => 80,
+    };
+
+    let host = if authority.host().contains(':') {
+        format!("[{}]", authority.host())
+    } else {
+        authority.host().to_string()
+    };
+
+    format!("{}:{}", host, port).parse().ok()
 }

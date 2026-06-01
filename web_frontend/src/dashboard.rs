@@ -1,10 +1,10 @@
 use crate::blocking_enabled::BlockingEnabled;
+use crate::api;
 use crate::save_ca_certificate::SaveCaCertificate;
 use futures::future::{AbortHandle, Abortable};
 use gloo_timers::future::TimeoutFuture;
 use num_format::{Locale, ToFormattedString};
 use serde::Deserialize;
-use tauri_sys::tauri;
 use wasm_bindgen_futures::spawn_local;
 use yew::{html, Component, Context, Html};
 
@@ -35,7 +35,14 @@ impl Component for Dashboard {
         let future = Abortable::new(
             async move {
                 loop {
-                    let mut message: Message = tauri::invoke("get_statistics", &()).await.unwrap();
+                    let mut message: Message = match api::get_statistics().await {
+                        Ok(message) => message,
+                        Err(err) => {
+                            log::error!("Failed to load statistics: {}", err);
+                            TimeoutFuture::new(1000).await;
+                            continue;
+                        }
+                    };
 
                     // Invoke seems to reshuffle the data?
                     message.top_clients.sort_by(|a, b| b.1.cmp(&a.1));

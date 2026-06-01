@@ -1,0 +1,8 @@
+target
+.git
+.agents
+.codex
+web_frontend/node_modules
+web_frontend/dist
+src-tauri/target
+**/*.log

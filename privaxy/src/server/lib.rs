@@ -1,17 +1,21 @@
 use crate::blocker::AdblockRequester;
 use crate::events::Event;
 use crate::proxy::exclusions::LocalExclusionStore;
+use crate::proxy::upstream::UpstreamProxy;
 use hyper::server::conn::AddrStream;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Client, Server};
 use proxy::exclusions;
 use reqwest::redirect::Policy;
 use std::convert::Infallible;
-use std::net::SocketAddr;
+use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use tokio::sync::broadcast;
+
+const UPSTREAM_PROXY_ENV: &str = "PRIVAXY_UPSTREAM_PROXY";
+const BIND_IP_ENV: &str = "PRIVAXY_BIND_IP";
 
 pub mod blocker;
 mod blocker_utils;
@@ -21,6 +25,7 @@ pub mod configuration;
 pub mod events;
 mod proxy;
 pub mod statistics;
+pub mod web_admin;
 
 #[derive(Debug, Clone)]
 pub struct PrivaxyServer {
@@ -35,11 +40,14 @@ pub struct PrivaxyServer {
 }
 
 pub async fn start_privaxy() -> PrivaxyServer {
-    let ip = [127, 0, 0, 1];
+    let ip: IpAddr = std::env::var(BIND_IP_ENV)
+        .ok()
+        .and_then(|ip| ip.parse().ok())
+        .unwrap_or([127, 0, 0, 1].into());
 
     // We use reqwest instead of hyper's client to perform most of the proxying as it's more convenient
     // to handle compression as well as offers a more convenient interface.
-    let client = reqwest::Client::builder()
+    let configuration_client = reqwest::Client::builder()
         .use_rustls_tls()
         .redirect(Policy::none())
         .no_proxy()
@@ -49,7 +57,48 @@ pub async fn start_privaxy() -> PrivaxyServer {
         .build()
         .unwrap();
 
-    let configuration = match configuration::Configuration::read_from_home(client.clone()).await {
+    let mut proxied_client_builder = reqwest::Client::builder()
+        .use_rustls_tls()
+        .redirect(Policy::none())
+        .no_proxy()
+        .gzip(true)
+        .brotli(true)
+        .deflate(true);
+
+    let upstream_proxy = match std::env::var(UPSTREAM_PROXY_ENV) {
+        Ok(upstream_proxy) => {
+            let proxy = match reqwest::Proxy::all(&upstream_proxy) {
+                Ok(proxy) => proxy,
+                Err(err) => {
+                    println!(
+                        "Invalid upstream proxy in {}: {:?}",
+                        UPSTREAM_PROXY_ENV, err
+                    );
+                    std::process::exit(1)
+                }
+            };
+
+            proxied_client_builder = proxied_client_builder.proxy(proxy);
+            log::info!("Proxying MITM traffic through {}", upstream_proxy);
+
+            match UpstreamProxy::parse(&upstream_proxy) {
+                Ok(upstream_proxy) => Some(upstream_proxy),
+                Err(err) => {
+                    println!("Invalid upstream proxy in {}: {}", UPSTREAM_PROXY_ENV, err);
+                    std::process::exit(1)
+                }
+            }
+        }
+        Err(_) => None,
+    };
+
+    let proxied_client = proxied_client_builder.build().unwrap();
+
+    let configuration = match configuration::Configuration::read_from_home(
+        configuration_client.clone(),
+    )
+    .await
+    {
         Ok(configuration) => configuration,
         Err(err) => {
             println!(
@@ -103,7 +152,7 @@ pub async fn start_privaxy() -> PrivaxyServer {
 
     let configuration_updater = configuration::ConfigurationUpdater::new(
         configuration.clone(),
-        client.clone(),
+        configuration_client.clone(),
         blocker_requester.clone(),
         None,
     )
@@ -139,26 +188,28 @@ pub async fn start_privaxy() -> PrivaxyServer {
     let make_service = make_service_fn(move |conn: &AddrStream| {
         let client_ip_address = conn.remote_addr().ip();
 
-        let client = client.clone();
+        let proxied_client = proxied_client.clone();
         let hyper_client = hyper_client.clone();
         let cert_cache = cert_cache.clone();
         let blocker_requester = blocker_requester.clone();
         let broadcast_tx = broadcast_tx.clone();
         let statistics = statistics.clone();
         let local_exclusion_store = local_exclusion_store.clone();
+        let upstream_proxy = upstream_proxy.clone();
 
         async move {
             Ok::<_, Infallible>(service_fn(move |req| {
                 proxy::serve_mitm_session(
                     blocker_requester.clone(),
                     hyper_client.clone(),
-                    client.clone(),
+                    proxied_client.clone(),
                     req,
                     cert_cache.clone(),
                     broadcast_tx.clone(),
                     statistics.clone(),
                     client_ip_address,
                     local_exclusion_store.clone(),
+                    upstream_proxy.clone(),
                 )
             }))
         }

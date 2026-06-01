@@ -1,6 +1,5 @@
-use crate::{save_button, submit_banner};
+use crate::{api, save_button, submit_banner};
 use serde::{Deserialize, Serialize};
-use tauri_sys::tauri;
 use wasm_bindgen_futures::spawn_local;
 use yew::{html, Callback, Component, Context, Html};
 
@@ -26,12 +25,6 @@ pub struct Filter {
 pub struct FilterStatusChangeRequest {
     enabled: bool,
     file_name: String,
-}
-
-#[allow(non_snake_case)]
-#[derive(Serialize)]
-pub struct FilterStatusChangeRequestPayload {
-    filterStatusChangeRequest: Vec<FilterStatusChangeRequest>,
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq, Eq)]
@@ -81,12 +74,12 @@ impl Component for Filters {
                 let message_callback = ctx.link().callback(|message: Message| message);
 
                 spawn_local(async move {
-                    let filter_configuration: FilterConfiguration =
-                        tauri::invoke("get_filters_configuration", &())
-                            .await
-                            .unwrap();
-
-                    message_callback.emit(Message::Display(filter_configuration))
+                    match api::get_filters_configuration().await {
+                        Ok(filter_configuration) => {
+                            message_callback.emit(Message::Display(filter_configuration))
+                        }
+                        Err(err) => log::error!("Failed to load filters: {}", err),
+                    }
                 });
             }
             Message::Save => {
@@ -109,14 +102,10 @@ impl Component for Filters {
                 let callback = ctx.link().callback(|message: Message| message);
 
                 spawn_local(async move {
-                    let _res = tauri::invoke::<_, FilterConfiguration>(
-                        "change_filter_status",
-                        &FilterStatusChangeRequestPayload {
-                            filterStatusChangeRequest: request_body,
-                        },
-                    )
-                    .await;
-                    callback.emit(Message::ChangesSaved)
+                    match api::change_filter_status::<FilterConfiguration, _>(request_body).await {
+                        Ok(_) => callback.emit(Message::ChangesSaved),
+                        Err(err) => log::error!("Failed to save filters: {}", err),
+                    }
                 });
 
                 log::info!("Save")

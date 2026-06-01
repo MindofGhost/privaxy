@@ -2,6 +2,10 @@ use yew::functional::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+mod api;
 mod blocking_enabled;
 mod dashboard;
 mod filters;

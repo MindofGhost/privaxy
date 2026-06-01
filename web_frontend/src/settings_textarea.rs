@@ -1,17 +1,11 @@
+use crate::api;
 use crate::save_button;
 use crate::submit_banner;
-use serde::Serialize;
-use tauri_sys::tauri;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlInputElement;
 use yew::virtual_dom::VNode;
 use yew::Properties;
 use yew::{html, Component, Context, Html, InputEvent, TargetCast};
-
-#[derive(Serialize)]
-struct SettingTauriPayload {
-    input: String,
-}
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -69,16 +63,14 @@ impl Component for SettingsTextarea {
                 let resource_name = ctx.props().set_resource_name.clone();
                 let input_data = self.input_data.clone();
 
-                spawn_local(async move {
-                    tauri::invoke::<_, ()>(
-                        &resource_name,
-                        &SettingTauriPayload { input: input_data },
-                    )
-                    .await
-                    .unwrap();
-                });
+                let message_callback = ctx.link().callback(|message: Message| message);
 
-                ctx.link().send_message(Message::Saved);
+                spawn_local(async move {
+                    match api::set_text_resource(&resource_name, input_data).await {
+                        Ok(_) => message_callback.emit(Message::Saved),
+                        Err(err) => log::error!("Failed to save setting: {}", err),
+                    }
+                });
             }
             Message::Saved => {
                 ctx.link().send_message(Message::UpdatePreviousInputData);
@@ -92,12 +84,13 @@ impl Component for SettingsTextarea {
                 let message_callback = ctx.link().callback(|message: Message| message);
 
                 spawn_local(async move {
-                    let payload = tauri::invoke::<_, String>(&resource_name, &())
-                        .await
-                        .unwrap();
-
-                    message_callback.emit(Message::UpdateInput(payload));
-                    message_callback.emit(Message::UpdatePreviousInputData)
+                    match api::get_text_resource(&resource_name).await {
+                        Ok(payload) => {
+                            message_callback.emit(Message::UpdateInput(payload));
+                            message_callback.emit(Message::UpdatePreviousInputData)
+                        }
+                        Err(err) => log::error!("Failed to load setting: {}", err),
+                    }
                 });
             }
             Message::UpdatePreviousInputData => {

@@ -1,11 +1,17 @@
+#[cfg(feature = "tauri-backend")]
 use std::path::{Path, PathBuf};
 
+#[cfg(feature = "tauri-backend")]
 use serde::Serialize;
+#[cfg(feature = "tauri-backend")]
 use tauri_sys::dialog::FileDialogBuilder;
+#[cfg(feature = "tauri-backend")]
 use tauri_sys::event::emit;
+#[cfg(feature = "tauri-backend")]
 use wasm_bindgen_futures::spawn_local;
 use yew::{html, Component, Context, Html};
 
+#[cfg(feature = "tauri-backend")]
 #[derive(Serialize)]
 struct SaveCertificatePayload(PathBuf);
 
@@ -26,6 +32,7 @@ impl Component for SaveCaCertificate {
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::SaveCaCertificate => {
+                #[cfg(feature = "tauri-backend")]
                 spawn_local(async move {
                     let path = FileDialogBuilder::new()
                         .add_filter("privaxy_ca_cert", &["pem"])
@@ -37,6 +44,13 @@ impl Component for SaveCaCertificate {
                         let _ = emit("save_ca_file", &SaveCertificatePayload(path)).await;
                     }
                 });
+
+                #[cfg(feature = "web-backend")]
+                {
+                    let _ = gloo_utils::window()
+                        .location()
+                        .set_href("/api/ca-certificate");
+                }
             }
         }
 

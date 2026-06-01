@@ -1,8 +1,5 @@
-use futures::future::{AbortHandle, Abortable};
-use futures::StreamExt;
+use crate::api::{self, RequestEvents};
 use serde::Deserialize;
-use tauri_sys::event;
-use wasm_bindgen_futures::spawn_local;
 use yew::{html, Component, Context, Html};
 
 const MAX_REQUESTS_SHOWN: usize = 500;
@@ -17,7 +14,7 @@ pub struct Message {
 
 pub struct Requests {
     messages: Vec<Message>,
-    abort_handle: AbortHandle,
+    request_events: RequestEvents,
 }
 
 impl Component for Requests {
@@ -27,23 +24,10 @@ impl Component for Requests {
     fn create(ctx: &Context<Self>) -> Self {
         let message_callback = ctx.link().callback(|message: Message| message);
 
-        let (abort_handle, abort_registration) = AbortHandle::new_pair();
-        let future = Abortable::new(
-            async move {
-                let mut events = event::listen::<Message>("logged_request").await.unwrap();
-                while let Some(event) = events.next().await {
-                    message_callback.emit(event.payload);
-                }
-            },
-            abort_registration,
-        );
-
-        spawn_local(async {
-            let _result = future.await;
-        });
+        let request_events = api::listen_requests(message_callback);
 
         Self {
-            abort_handle,
+            request_events,
             messages: Vec::new(),
         }
     }
@@ -128,6 +112,6 @@ impl Component for Requests {
     }
 
     fn destroy(&mut self, _ctx: &Context<Self>) {
-        self.abort_handle.abort()
+        self.request_events.close()
     }
 }

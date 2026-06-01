@@ -1,4 +1,4 @@
-use super::{exclusions::LocalExclusionStore, serve::serve};
+use super::{exclusions::LocalExclusionStore, serve::serve, upstream::UpstreamProxy};
 use crate::{blocker::AdblockRequester, cert::CertCache, events::Event, statistics::Statistics};
 use http::uri::{Authority, Scheme};
 use hyper::{
@@ -21,6 +21,7 @@ pub(crate) async fn serve_mitm_session(
     statistics: Statistics,
     client_ip_address: IpAddr,
     local_exclusion_store: LocalExclusionStore,
+    upstream_proxy: Option<UpstreamProxy>,
 ) -> Result<Response<Body>, hyper::Error> {
     let authority = match req.uri().authority().cloned() {
         Some(authority) => authority,
@@ -53,7 +54,7 @@ pub(crate) async fn serve_mitm_session(
                     let is_host_blacklisted = local_exclusion_store.contains(authority.host());
 
                     if is_host_blacklisted {
-                        let _result = tunnel(&mut upgraded, &authority).await;
+                        let _result = tunnel(&mut upgraded, &authority, upstream_proxy).await;
 
                         return;
                     }
@@ -79,6 +80,7 @@ pub(crate) async fn serve_mitm_session(
                                             broadcast_tx.clone(),
                                             statistics.clone(),
                                             client_ip_address,
+                                            upstream_proxy.clone(),
                                         )
                                     }),
                                 )
@@ -114,13 +116,21 @@ pub(crate) async fn serve_mitm_session(
             broadcast_tx,
             statistics,
             client_ip_address,
+            upstream_proxy,
         )
         .await
     }
 }
 
-async fn tunnel(mut upgraded: &mut Upgraded, authority: &Authority) -> std::io::Result<()> {
-    let mut server = TcpStream::connect(authority.to_string()).await?;
+async fn tunnel(
+    mut upgraded: &mut Upgraded,
+    authority: &Authority,
+    upstream_proxy: Option<UpstreamProxy>,
+) -> std::io::Result<()> {
+    let mut server = match upstream_proxy {
+        Some(upstream_proxy) => upstream_proxy.connect_tunnel(authority).await?,
+        None => TcpStream::connect(authority.to_string()).await?,
+    };
 
     tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
 

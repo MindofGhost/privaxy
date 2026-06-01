@@ -1,12 +1,6 @@
-use serde::{Deserialize, Serialize};
-use tauri_sys::tauri;
+use crate::api;
 use wasm_bindgen_futures::spawn_local;
 use yew::{classes, html, Component, Context, Html};
-
-#[derive(Deserialize, Serialize)]
-struct TauriBlockingEnabledArg {
-    enabled: bool,
-}
 
 pub struct BlockingEnabled {
     blocking_enabled: bool,
@@ -39,11 +33,7 @@ impl Component for BlockingEnabled {
         match msg {
             Message::EnableBlocking => {
                 spawn_local(async move {
-                    match tauri::invoke::<_, ()>(
-                        "set_blocking_enabled",
-                        &TauriBlockingEnabledArg { enabled: true },
-                    )
-                    .await
+                    match api::set_blocking_enabled(true).await
                     {
                         Ok(_) => {
                             message_callback.emit(Message::BlockingEnabled);
@@ -57,11 +47,7 @@ impl Component for BlockingEnabled {
             }
             Message::DisableBlocking => {
                 spawn_local(async move {
-                    match tauri::invoke::<_, ()>(
-                        "set_blocking_enabled",
-                        &TauriBlockingEnabledArg { enabled: false },
-                    )
-                    .await
+                    match api::set_blocking_enabled(false).await
                     {
                         Ok(_) => {
                             message_callback.emit(Message::BlockingDisabled);
@@ -81,7 +67,7 @@ impl Component for BlockingEnabled {
             }
             Message::SetCurrentBlockingState => {
                 spawn_local(async move {
-                    match tauri::invoke::<_, bool>("get_blocking_enabled", &()).await {
+                    match api::get_blocking_enabled().await {
                         Ok(bool_) => {
                             if bool_ {
                                 message_callback.emit(Message::BlockingEnabled);
