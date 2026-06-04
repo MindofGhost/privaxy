@@ -6,7 +6,6 @@ use hyper::server::conn::AddrStream;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Client, Server};
 use proxy::exclusions;
-use reqwest::redirect::Policy;
 use std::convert::Infallible;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
@@ -47,19 +46,11 @@ pub async fn start_privaxy() -> PrivaxyServer {
 
     // We use reqwest instead of hyper's client to perform most of the proxying as it's more convenient
     // to handle compression as well as offers a more convenient interface.
-    let configuration_client = reqwest::Client::builder()
-        .use_rustls_tls()
-        .redirect(Policy::none())
-        .no_proxy()
-        .gzip(true)
-        .brotli(true)
-        .deflate(true)
-        .build()
-        .unwrap();
+    let configuration_client = configuration::build_http_client();
 
     let mut proxied_client_builder = reqwest::Client::builder()
         .use_rustls_tls()
-        .redirect(Policy::none())
+        .redirect(reqwest::redirect::Policy::none())
         .no_proxy()
         .gzip(true)
         .brotli(true)

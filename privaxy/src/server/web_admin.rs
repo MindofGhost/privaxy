@@ -1,4 +1,4 @@
-use crate::configuration::Configuration;
+use crate::configuration::{self, Configuration};
 use crate::events::Event;
 use crate::PrivaxyServer;
 use hyper::body::Bytes;
@@ -33,11 +33,7 @@ struct FilterStatusChangeRequest {
 }
 
 pub async fn start_web_admin(privaxy_server: PrivaxyServer, bind_addr: SocketAddr) {
-    let http_client = reqwest::Client::builder()
-        .use_rustls_tls()
-        .no_proxy()
-        .build()
-        .unwrap();
+    let http_client = configuration::build_http_client();
     let state = Arc::new(WebAdminState {
         privaxy_server,
         http_client,

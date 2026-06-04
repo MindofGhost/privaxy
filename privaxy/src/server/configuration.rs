@@ -16,6 +16,7 @@ use tokio::{fs, sync::mpsc::Receiver};
 use url::{ParseError, Url};
 
 const BASE_FILTERS_URL: &str = "https://filters.privaxy.net";
+const FILTERS_UPSTREAM_PROXY_ENV: &str = "PRIVAXY_FILTERS_UPSTREAM_PROXY";
 const METADATA_FILE_NAME: &str = "metadata.json";
 const CONFIGURATION_DIRECTORY_NAME: &str = ".privaxy";
 const CONFIGURATION_FILE_NAME: &str = "config";
@@ -25,6 +26,34 @@ const FILTERS_DIRECTORY_NAME: &str = "filters";
 const FILTERS_UPDATE_AFTER: Duration = Duration::from_secs(60 * 10);
 
 type ConfigurationResult<T> = Result<T, ConfigurationError>;
+
+pub(crate) fn build_http_client() -> reqwest::Client {
+    let mut client_builder = reqwest::Client::builder()
+        .use_rustls_tls()
+        .redirect(reqwest::redirect::Policy::none())
+        .no_proxy()
+        .gzip(true)
+        .brotli(true)
+        .deflate(true);
+
+    if let Ok(proxy_url) = std::env::var(FILTERS_UPSTREAM_PROXY_ENV) {
+        let proxy = match reqwest::Proxy::all(&proxy_url) {
+            Ok(proxy) => proxy,
+            Err(err) => {
+                println!(
+                    "Invalid filters upstream proxy in {}: {:?}",
+                    FILTERS_UPSTREAM_PROXY_ENV, err
+                );
+                std::process::exit(1)
+            }
+        };
+
+        client_builder = client_builder.proxy(proxy);
+        log::info!("Proxying filter update traffic through {}", proxy_url);
+    }
+
+    client_builder.build().unwrap()
+}
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 enum FilterGroup {
