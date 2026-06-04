@@ -1,0 +1,590 @@
+[
+  {
+    "file_name": "2f5de0ab500a9244d9fc74de81ac2b855ede2f613142e3e2109cab876b624efc.txt",
+    "source_url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+    "title": "uBlock filters",
+    "group": "default",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "f87dd7cec1b9536cdf1b2f377cfa5b84833879add3576622c3f2285bb4991200.txt",
+    "source_url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
+    "title": "uBlock filters - Badware risks",
+    "group": "default",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "6d63388c8e03199741ff3281dfba6f30ffb21e1e2a17a401f37be91733b27962.txt",
+    "source_url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
+    "title": "uBlock filters - Privacy",
+    "group": "default",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "f20d5302c420fa0917109d7278f76bc2f3dd984decb2484d2f99d5584db30adf.txt",
+    "source_url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt",
+    "title": "uBlock filters - Resource abuse",
+    "group": "default",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "d461a112bbc83083a8fe1ea5800d4c85e8938d324e1816b5ebc926c15dca0df5.txt",
+    "source_url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
+    "title": "uBlock filters - Unbreak",
+    "group": "default",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "ee18f6ca23385fe52e002118d23eb38e5a3eeca331025aecdbdc91b8657bf4fa.txt",
+    "source_url": "https://ublockorigin.github.io/uAssetsCDN/filters/quick-fixes.min.txt",
+    "title": "uBlock filters - Quick fixes",
+    "group": "default",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "cc2258f440be6fcb68a946eb30d46667123a93d343880cc03405b7b84e024044.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/2_without_easylist.txt",
+    "title": "AdGuard Base",
+    "group": "ads",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "d5e95cc5c21f961fbd649841edbd38ddc56086c8d6a8f60b14c8865a6f737759.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/11.txt",
+    "title": "AdGuard Mobile Ads",
+    "group": "ads",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "d830652ca9effb01098cac7485cc98820432c4174970389c190cc36ada100f82.txt",
+    "source_url": "https://easylist.to/easylist/easylist.txt",
+    "title": "[Ad-PLUS] EasyList",
+    "group": "ads",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "c9379356178877a11c8b8675f777a6be1393ace89cf1723a0d31a18330eda62c.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/3.txt",
+    "title": "AdGuard Tracking Protection",
+    "group": "privacy",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "760680884b2c7ce3e824e1f23a5357dca84979e9121f4cdc9732402b5f8fcebc.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/17.txt",
+    "title": "AdGuard URL Tracking Protection",
+    "group": "privacy",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "44c685bcb46d20ccff58ac6c1e96ac31e42e0c99be4c3008f07aab81f2fd3f51.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/cntblock.txt",
+    "title": "RU AdList: Counters",
+    "group": "privacy",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "7a1d5041912dfb234f198852cb1e6315afebfd6284db8510eacbebf8b458d89d.txt",
+    "source_url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/lan-block.txt",
+    "title": "Block Outsider Intrusion into LAN",
+    "group": "privacy",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "36abbf9cea0f994d7b1d53a1bbc8d8c22836db5dea86723f9e4bef6d7840cd53.txt",
+    "source_url": "https://easylist.to/easylist/easyprivacy.txt",
+    "title": "[Ad-PLUS] EasyPrivacy",
+    "group": "privacy",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "064e35f2cd59b5c2b12efc5941f1e146ae421762f00ad7913d9b35260105ee89.txt",
+    "source_url": "https://curben.gitlab.io/malware-filter/phishing-filter.txt",
+    "title": "Phishing URL Blocklist",
+    "group": "malware",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "d2e5d0410c459b328c4f6f2881e9e661a318f9e96e84bb4b2dfd2f001898797b.txt",
+    "source_url": "https://curben.gitlab.io/malware-filter/pup-filter.txt",
+    "title": "PUP Domains Blocklist",
+    "group": "malware",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "9d0335099061c858288d51255ae5bf7f9f6965814c5aa61abc0568d600ff6afa.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/14.txt",
+    "title": "AdGuard Annoyances",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "27c8295f4f43c13826c23b8c449fa52f3254525ad1314f958528377f1ff9512d.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/4.txt",
+    "title": "AdGuard Social Media",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "fbf6460c6c9016c2161aa595935013be0d72e72e7eb5cd3189d6f347bc6af866.txt",
+    "source_url": "https://secure.fanboy.co.nz/fanboy-antifacebook.txt",
+    "title": "Anti-Facebook",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "a3fa193ea755e0d2a7c532d95b5c5fef578af174559500a7a84e0f4c433076b3.txt",
+    "source_url": "https://secure.fanboy.co.nz/fanboy-annoyance.txt",
+    "title": "Fanboy's Annoyance",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "d4800fdfa094fa995b12b7774dc78545abbb1006144461603dd43963ae55374a.txt",
+    "source_url": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt",
+    "title": "EasyList Cookie",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "c859b167d9800dae4238a8ed4cb7d8d86f0fab830a11bdc0d8ab2ce9b455ff09.txt",
+    "source_url": "https://easylist.to/easylist/fanboy-social.txt",
+    "title": "[Ad-PLUS] Fanboy's Social",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "00450f334ef81ab8f4d7fb5ebfebf3c99fc23acde2224adae4eab4eebc84701c.txt",
+    "source_url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/annoyances.txt",
+    "title": "uBlock filters - Annoyances",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "cb1428d45c4d0d256ca8230102f2edf92e04c6f6fc59f477d127c346ce02bf24.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/antiadblockfilters.txt",
+    "title": "Adblock Warning Removal List",
+    "group": "social",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "fae3f1954da5e34c5e1e46e5730f6c7eaab110f4e2e152a88686f04f2d936f07.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/5.txt",
+    "title": "AdGuard Experimental filter",
+    "group": "ads",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "389e3e737b313ed76e72843fcc8f03926a57ca8ca5afd11823bcd13820f46d22.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/Liste_AR.txt",
+    "title": "[Ad-PLUS] ARA: Liste AR",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "02da62aab3b952689d4744fcd5e4453ee54a1e5083b926143765874aba0d52c7.txt",
+    "source_url": "https://stanev.org/abp/adblock_bg.txt",
+    "title": "[Ad-PLUS] BGR: Bulgarian Adblock list",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "2d0cafe1c572a2f993f2b7df0ffaa80d49cf5a92b82f55947aa5b605ae380c12.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/224.txt",
+    "title": "CHN: AdGuard Chinese (\u4e2d\u6587)",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "0d483d3beead6f716ce0ee269f4adf8c0ee101c3ef300d07db533fe59de299d9.txt",
+    "source_url": "https://raw.githubusercontent.com/tomasko126/easylistczechandslovak/master/filters.txt",
+    "title": "[Ad-PLUS] CZE, SVK: EasyList Czech and Slovak",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "85a71faea36305936f20547d3e6eeb6ea85970737b9f923fa9c8b9378e79dd25.txt",
+    "source_url": "https://easylist.to/easylistgermany/easylistgermany.txt",
+    "title": "[Ad-PLUS] DEU: EasyList Germany",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "40b62d4bb871ae82056941c0d92f190d9c6e4f4d189d4d7a3dc7796a0d97faa9.txt",
+    "source_url": "https://adblock.ee/list.php",
+    "title": "[Ad-PLUS] EST: Eesti saitidele kohandatud filter",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "c930ad877d1f72237590283c39da41632fd9075463ad57ec29790592f37bf6fa.txt",
+    "source_url": "https://raw.githubusercontent.com/finnish-easylist-addition/finnish-easylist-addition/master/Finland_adb.txt",
+    "title": "FIN: Adblock List for Finland",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "96b5bc8a21a16eb7660cdc401a4fb6dfcfd37b2cb9226f3e53483ed4c218a1a4.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/16.txt",
+    "title": "FRA: AdGuard Fran\u00e7ais",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "5a002218d86f318cb43d3fdc12061068d1f8cab803629761c52598695fd98258.txt",
+    "source_url": "https://www.void.gr/kargig/void-gr-filters.txt",
+    "title": "[Ad-PLUS] GRC: Greek AdBlock Filter",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "f4792c73755ad7c1698955bd40cdf85083c7598cdd43506fd5583fae775f7152.txt",
+    "source_url": "https://raw.githubusercontent.com/hufilter/hufilter/master/hufilter-ublock.txt",
+    "title": "[Ad-PLUS] HUN: hufilter",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "71b7f792e92867b048ffa7de0e6f48757e0b24e1db42cb786041381fd84b0093.txt",
+    "source_url": "https://raw.githubusercontent.com/ABPindo/indonesianadblockrules/master/subscriptions/abpindo.txt",
+    "title": "[Ad-PLUS] IDN, MYS: ABPindo",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "a8d5eac87bfbe1b5b7e3d48d6058678d31fb5e92ba7c1cad7bc3b9a7570c0e47.txt",
+    "source_url": "https://raw.githubusercontent.com/farrokhi/adblock-iran/master/filter.txt",
+    "title": "IRN: Adblock-Iran",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "fd70e1c093f7f63b11ff7883781a8c90d081b83a3defe809d546166a2bbbaca2.txt",
+    "source_url": "https://adblock.gardar.net/is.abp.txt",
+    "title": "[Ad-PLUS] ISL: Icelandic ABP List",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "491fcaf0326c0c1cc84e9c42f492414163ec2dfc8a70ef6c476f820e3161c259.txt",
+    "source_url": "https://raw.githubusercontent.com/easylist/EasyListHebrew/master/EasyListHebrew.txt",
+    "title": "[Ad-PLUS] ISR: EasyList Hebrew",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "1e73dae408cf05c4e49c856cd6400cf576d2152e506658ff41faeb3e99679074.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/easylistitaly.txt",
+    "title": "[Ad-PLUS] ITA: EasyList Italy",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "d308c5fab81561b8f8748552ffe25ac43bd1837f9675857809067861e9f3c259.txt",
+    "source_url": "https://raw.githubusercontent.com/gioxx/xfiles/master/filtri.txt",
+    "title": "[Ad-PLUS] ITA: ABP X Files",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "8c70babb2fe2101c6f468dcec31fd1bb176e5d18b4b8952c8570556eb85a4326.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/7.txt",
+    "title": "JPN: AdGuard Japanese",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "07b8865dad9cea90cdf23a35276a497bc3c9fb2d5bdbf5a9c6e1f7d75783e83e.txt",
+    "source_url": "https://raw.githubusercontent.com/yous/YousList/master/youslist.txt",
+    "title": "[Ad-PLUS] KOR: YousList",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "69266d84bd19b9d57bb781d0ab0eda58fdff232b01a302d8ec8a953802cf38f0.txt",
+    "source_url": "https://raw.githubusercontent.com/EasyList-Lithuania/easylist_lithuania/master/easylistlithuania.txt",
+    "title": "[Ad-PLUS] LTU: EasyList Lithuania",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "28181b1a27a297c7e86e9bbc1381622c93e176e7c5485c3d5db1a84dab641e69.txt",
+    "source_url": "https://notabug.org/latvian-list/adblock-latvian/raw/master/lists/latvian-list.txt",
+    "title": "[Ad-PLUS] LVA: Latvian List",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "c82afd1f8973f1b3685fb6738a28c9eab5f630d225376db1f6a20ea8dbd44ec9.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/easylistdutch.txt",
+    "title": "[Ad-PLUS] NLD: EasyList Dutch",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "a7753db835f968499d12ff3282a9baac5ae2e5a4eab6a5908806722218b313bb.txt",
+    "source_url": "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/NorwegianList.txt",
+    "title": "[Ad-PLUS] NOR, DNK, ISL, FRO, GRL, FIN: Dandelion Sprouts nordiske filtre",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "ede50a2da8886916f36fac720366f1555ac94db82ecd3c6d5de623fdb4d2935d.txt",
+    "source_url": "https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-adblock-filters/adblock.txt",
+    "title": "POL: Oficjalne Polskie Filtry do AdBlocka, uBlocka Origin i AdGuarda",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "95ac8b242eb9640e5e12b6a4df222c3f5fac5684aafb51643de3fc2fd3d652bb.txt",
+    "source_url": "https://raw.githubusercontent.com/olegwukr/polish-privacy-filters/master/anti-adblock.txt",
+    "title": "POL: Oficjalne polskie filtry przeciwko alertom o Adblocku",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "d22291522966db340bb3455d93019edc1557810979810bb0a668f6fcaf883c08.txt",
+    "source_url": "https://road.adblock.ro/lista.txt",
+    "title": "ROU: Romanian Ad (ROad) Block List Light",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "12819628c4a1e8d6fbe36d44dfa4a0ec95142e2ccd3d6461d4e867640b318236.txt",
+    "source_url": "https://filters.adtidy.org/extension/chromium/filters/1.txt",
+    "title": "RUS: AdGuard Russian",
+    "group": "regional",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "fe56bbdd5f4587511338b0fa6e6f5216346be60ed4a5505862605ce8393ff088.txt",
+    "source_url": "https://raw.githubusercontent.com/hant0508/uBlock-filters/master/filters.txt",
+    "title": "RUS: hant0508 additional filters",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "9a255626cf492c1be8cef96f631b63c138d840dfc2a988b5b3d72d1983b29a4c.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/easylistspanish.txt",
+    "title": "[Ad-PLUS] ESP: EasyList Spanish",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "e053287b737cd0c02cbcf1f5e3c9b7fc2dfc6143ef25041a07cfc7df8d610381.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/9.txt",
+    "title": "spa, por: AdGuard Spanish/Portuguese",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "50b5488d75bebe0b026dc93afa181998b5f762db7718c8c6275ac19cac09817d.txt",
+    "source_url": "https://raw.githubusercontent.com/betterwebleon/slovenian-list/master/filters.txt",
+    "title": "SVN: Slovenian List",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "a6f0d4f5ec85612ab30a4b2c58911f6679c21c1941479acbb395297ad8b74f70.txt",
+    "source_url": "https://raw.githubusercontent.com/lassekongo83/Frellwits-filter-lists/master/Frellwits-Swedish-Filter.txt",
+    "title": "SWE: Frellwit's Swedish Filter",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "e6f8d4828eb3073b79fb50362b119c2b0a7b48f3f448046d9e2da3d3aeb3c84c.txt",
+    "source_url": "https://raw.githubusercontent.com/easylist-thailand/easylist-thailand/master/subscription/easylist-thailand.txt",
+    "title": "THA: EasyList Thailand",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "60b24b7374a90a9186fcce89ddd57fac005dc0db69d1e8d14faac5eecb0946cb.txt",
+    "source_url": "https://filters.adtidy.org/extension/ublock/filters/13.txt",
+    "title": "TUR: AdGuard Turkish",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "12fcd42b822f1506e328dc59c15463f4f1b8b955abfe44388b1fff452d4c9c34.txt",
+    "source_url": "https://raw.githubusercontent.com/abpvn/abpvn/master/filter/abpvn_ublock.txt",
+    "title": "[Ad-PLUS] VNM: ABPVN List",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "c8669035859aeb7cea1aa87f55ed8135e6e63ed148cdba79465b03ee68dc932d.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/easylistchina.txt",
+    "title": "[Ad-PLUS] CHN: EasyList China",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "d2386b6dc8a53b2f2444fa8215f2ca5c3cda21ad9369e48ee6eea84ed192f61c.txt",
+    "source_url": "https://raw.githubusercontent.com/cjx82630/cjxlist/master/cjx-annoyance.txt",
+    "title": "[Ad-PLUS] CJX's Annoyance List",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "3acbb568403f72703bb9cd4444d4b55070f35a34cf43f418fc11945f0a8ddf5c.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/easylistpolish.txt",
+    "title": "[Ad-PLUS] POL: EasyList Polish",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "f4007e6fea4f5c57eee1e5c78f05278346bec006419dd33f6755dbbd9d9e47ae.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/easylistportuguese.txt",
+    "title": "[Ad-PLUS] PRT, BRA: EasyList Portuguese",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "027ffa8700308b7926fc9bcc7361be9df78cbb0756fc2b5c1e7ebd03c943df94.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/global-filters.txt",
+    "title": "[Ad-PLUS] THA, GRC, SVN, HRV, SRB, BIH, PHL: Global Filters",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "1cb2261dbdb66a8028507f4f339a361e95ad456f7d40516daac7fbd97bf1aea6.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/indianlist.txt",
+    "title": "[Ad-PLUS] IND: IndianList",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "6ed846b567d9ab8073ab50399a9a075068978a15f356aae19bd4a0f16c643ee9.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/japanese-filters.txt",
+    "title": "[Ad-PLUS] JPN: Japanese Filters",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "590c4518522a26a650ddf4aad155fd434724addc7e08235880aee7b54afbaa0b.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/koreanlist.txt",
+    "title": "[Ad-PLUS] KOR: KoreanList",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "9324211df113d5cba81b4d81b46ed9b88fc67f27e5f858f8c2cdecfa240ddb86.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/liste_fr.txt",
+    "title": "[Ad-PLUS] FRA: Liste FR",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "48cca3b78a4aebfba66b73c5c2b761545c69cd062213bd3698497169c57eff4c.txt",
+    "source_url": "https://www.zoso.ro/pages/rolist.txt",
+    "title": "[Ad-PLUS] ROU: ROList",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "670babf4db3c3f9b8c1bf763e570f8cf238dd2de8787dab85a89c7ed78498464.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/turkish-filters.txt",
+    "title": "[Ad-PLUS] TUR: Turkish Filters",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "2ae74262b805248762aba4d52057da92c0d86c064b2806f2e35e62a43a020c02.txt",
+    "source_url": "https://raw.githubusercontent.com/yecarrillo/adblock-colombia/master/adblock_co.txt",
+    "title": "[Ad-PLUS] COL: Colombian filters by yecarrillo",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "30933ef08468fe980bd4cbc1335f354b11bee1ac0e251e19463ec7192df9a0eb.txt",
+    "source_url": "https://280blocker.net/files/280blocker_adblock.txt",
+    "title": "[Ad-PLUS] JPN: 280blocker for japanese mobile site",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "18b9cdf12b307fb8658531ea9ff7e21ece6dcee2d380960cc287c1ecf149d967.txt",
+    "source_url": "https://bit.ly/11QrCfx",
+    "title": "[Ad-PLUS] JPN: ABP Japanese Filters",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "bb20b138801f0a7204727db11935d2c9b430f6b23e51ecebb0a09522bc72bb0c.txt",
+    "source_url": "https://raw.githubusercontent.com/SlashArash/adblockfa/master/adblockfa.txt",
+    "title": "[Ad-PLUS] IRN: AdBlockFarsi",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "dd21740cec5eadd3e8e8ee1d3227f1a22a51f08b5f6e8c0edea676ad4542f7db.txt",
+    "source_url": "https://gurud.ee/ab.txt",
+    "title": "[Ad-PLUS] EST: Estonian filters by Gurud.ee",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "bda8c470c58a6ca22013c710fc640a9a5111f12af3ad3fa1332583d7641a80a1.txt",
+    "source_url": "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&mimetype=plaintext",
+    "title": "[Ad-PLUS] Peter Lowe's list",
+    "group": "ads",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "4db39c63034d62dcdd1a56a60d1438f7895154581b3be23f16395a40dd7ff172.txt",
+    "source_url": "https://raw.githubusercontent.com/evenxzero/Raajje-AdList/master/filter.txt",
+    "title": "[Ad-PLUS] MDV: Raajje Adlist",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "50c62607674c18abbf522dd7d8c0d51f25304fb0b124bf5ed5269c24a69a46b9.txt",
+    "source_url": "https://raw.githubusercontent.com/Xaival/AdBlockList/main/Adblock_list.txt",
+    "title": "[Ad-PLUS] ESP: Tiswagos Liri AdBlockList",
+    "group": "regional",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "7c0a752b0f82988e8477900bec79b125b6b9376b6bf83177572c0279fd30f9bf.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/abp-filters-anti-cv.txt",
+    "title": "[Ad-PLUS] ABP filters",
+    "group": "ads",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "0e3f38156fe886834afc9dd5e629362769ec94d6918cea57f5c98576ffbc48f9.txt",
+    "source_url": "https://raw.githubusercontent.com/Spam404/lists/master/adblock-list.txt",
+    "title": "[Ad-PLUS] Spam404",
+    "group": "malware",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "c05f1a79d54948bc62e68d60d4288b0847f0ef1bdb25c0152ccbcd1043c5ac34.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/fanboy-notifications.txt",
+    "title": "[Ad-PLUS] Fanboy's Notifications Blocking List",
+    "group": "social",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "b7d1eb76ed3d34d0db677a26e3e112ea3e04b98d214fa0efd43dce25acc4c19a.txt",
+    "source_url": "https://raw.githubusercontent.com/bongochong/CombinedPrivacyBlockLists/master/MiniLists/cpbl-abp-mini.txt",
+    "title": "[Ad-PLUS] CPBL Filters for Adblock Plus (Mini)",
+    "group": "privacy",
+    "enabled_by_default": false
+  },
+  {
+    "file_name": "1aa9d13066d3f495af64ee60a3fcef8354cd9dcac851edbe984ee42dd5d94e4f.txt",
+    "source_url": "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/nocoin.txt",
+    "title": "[Ad-PLUS] NoCoin",
+    "group": "malware",
+    "enabled_by_default": true
+  },
+  {
+    "file_name": "2a1004d345242291c4ef6783c29dd5f69a20133a57a1d64aeabb943b7fc8aa81.txt",
+    "source_url": "https://raw.githubusercontent.com/Stevoisiak/Stevos-GenAI-Blocklist/refs/heads/main/GenAI-Blocklist.txt",
+    "title": "[Ad-PLUS] Stevo's GenAI Blocklist",
+    "group": "privacy",
+    "enabled_by_default": false
+  }
+]

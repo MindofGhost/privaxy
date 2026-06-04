@@ -94,7 +94,7 @@ pub async fn start_privaxy() -> PrivaxyServer {
 
     let proxied_client = proxied_client_builder.build().unwrap();
 
-    let configuration = match configuration::Configuration::read_from_home(
+    let mut configuration = match configuration::Configuration::read_from_home(
         configuration_client.clone(),
     )
     .await
@@ -108,6 +108,18 @@ pub async fn start_privaxy() -> PrivaxyServer {
             std::process::exit(1)
         }
     };
+
+    match configuration
+        .sync_default_filters(configuration_client.clone())
+        .await
+    {
+        Ok(true) => log::info!("Synchronized default filters configuration"),
+        Ok(false) => {}
+        Err(err) => log::warn!(
+            "Unable to synchronize default filters configuration, continuing with cached config: {:?}",
+            err
+        ),
+    }
 
     let local_exclusion_store =
         LocalExclusionStore::new(Vec::from_iter(configuration.exclusions.clone().into_iter()));

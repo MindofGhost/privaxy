@@ -16,7 +16,7 @@ services:
       - "8100:8100"
       - "8110:8110"
     volumes:
-      - privaxy-data:/root/.privaxy
+      - ./privaxy-data:/root/.privaxy
   gost:
     image: ginuerzh/gost:latest
     container_name: gost
@@ -26,6 +26,3 @@ services:
       - "8080:8080"
     command:
       - "-L=http://:8080"
-
-volumes:
-  privaxy-data:

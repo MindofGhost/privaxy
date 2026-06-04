@@ -1,4 +1,5 @@
 /target
+privaxy-data/
 /data
 web_frontend/dist
 .DS_Store

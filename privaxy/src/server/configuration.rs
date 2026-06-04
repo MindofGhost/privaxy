@@ -13,7 +13,7 @@ use std::{collections::BTreeSet, time::Duration};
 use thiserror::Error;
 use tokio::sync::{self, mpsc::Sender};
 use tokio::{fs, sync::mpsc::Receiver};
-use url::Url;
+use url::{ParseError, Url};
 
 const BASE_FILTERS_URL: &str = "https://filters.privaxy.net";
 const METADATA_FILE_NAME: &str = "metadata.json";
@@ -41,6 +41,7 @@ pub struct DefaultFilter {
     enabled_by_default: bool,
     file_name: String,
     group: String,
+    source_url: Option<String>,
     title: String,
 }
 
@@ -50,6 +51,8 @@ pub struct Filter {
     title: String,
     group: FilterGroup,
     file_name: String,
+    #[serde(default)]
+    source_url: Option<String>,
 }
 
 impl Filter {
@@ -62,7 +65,7 @@ impl Filter {
 
         fs::create_dir_all(&filters_directory).await?;
 
-        let filter = get_filter(&self.file_name, http_client).await?;
+        let filter = get_filter(self, http_client).await?;
 
         fs::write(filters_directory.join(&self.file_name), &filter).await?;
 
@@ -93,16 +96,9 @@ impl From<DefaultFilter> for Filter {
         Self {
             enabled: default_filter.enabled_by_default,
             title: default_filter.title,
-            group: match default_filter.group.as_str() {
-                "default" => FilterGroup::Default,
-                "regional" => FilterGroup::Regional,
-                "ads" => FilterGroup::Ads,
-                "privacy" => FilterGroup::Privacy,
-                "malware" => FilterGroup::Malware,
-                "social" => FilterGroup::Social,
-                _ => unreachable!(),
-            },
+            group: FilterGroup::from_default_filter_group(&default_filter.group),
             file_name: default_filter.file_name,
+            source_url: default_filter.source_url,
         }
     }
 }
@@ -135,6 +131,8 @@ pub enum ConfigurationError {
     UnableToDecodeFilterbytes(#[from] std::str::Utf8Error),
     #[error("unable to decode pem data")]
     UnableToDecodePem(#[from] openssl::error::ErrorStack),
+    #[error("unable to parse filter url")]
+    UrlParseError(#[from] ParseError),
 }
 
 impl Configuration {
@@ -173,6 +171,57 @@ impl Configuration {
                 }
             }
         }
+    }
+
+    pub async fn sync_default_filters(
+        &mut self,
+        http_client: reqwest::Client,
+    ) -> ConfigurationResult<bool> {
+        let default_filters = get_default_filters(http_client).await?;
+        let changed = self.merge_default_filters(default_filters);
+
+        if changed {
+            self.save().await?;
+        }
+
+        Ok(changed)
+    }
+
+    fn merge_default_filters(&mut self, default_filters: Vec<DefaultFilter>) -> bool {
+        let mut changed = false;
+
+        for default_filter in default_filters {
+            match self
+                .filters
+                .iter_mut()
+                .find(|filter| filter.file_name == default_filter.file_name)
+            {
+                Some(filter) => {
+                    let group = FilterGroup::from_default_filter_group(&default_filter.group);
+
+                    if filter.title != default_filter.title {
+                        filter.title = default_filter.title.clone();
+                        changed = true;
+                    }
+
+                    if filter.group != group {
+                        filter.group = group;
+                        changed = true;
+                    }
+
+                    if filter.source_url != default_filter.source_url {
+                        filter.source_url = default_filter.source_url.clone();
+                        changed = true;
+                    }
+                }
+                None => {
+                    self.filters.push(default_filter.into());
+                    changed = true;
+                }
+            }
+        }
+
+        changed
     }
 
     pub async fn save(&self) -> ConfigurationResult<()> {
@@ -314,11 +363,71 @@ async fn get_default_filters(
     let base_filters_url = BASE_FILTERS_URL.parse::<Url>().unwrap();
     let filters_url = base_filters_url.join(METADATA_FILE_NAME).unwrap();
 
-    let response = http_client.get(filters_url.as_str()).send().await?;
-
-    let default_filters = response.json::<Vec<DefaultFilter>>().await?;
+    let mut default_filters = match http_client.get(filters_url.as_str()).send().await {
+        Ok(response) => match response.error_for_status() {
+            Ok(response) => match response.json::<Vec<DefaultFilter>>().await {
+                Ok(default_filters) => default_filters,
+                Err(err) => {
+                    log::warn!(
+                        "Unable to decode default filters metadata, using built-in filters only: {:?}",
+                        err
+                    );
+                    Vec::new()
+                }
+            },
+            Err(err) => {
+                log::warn!(
+                    "Unable to retrieve default filters metadata, using built-in filters only: {:?}",
+                    err
+                );
+                Vec::new()
+            }
+        },
+        Err(err) => {
+            log::warn!(
+                "Unable to retrieve default filters metadata, using built-in filters only: {:?}",
+                err
+            );
+            Vec::new()
+        }
+    };
+    merge_builtin_filters(&mut default_filters);
 
     Ok(default_filters)
+}
+
+impl FilterGroup {
+    fn from_default_filter_group(group: &str) -> Self {
+        match group {
+            "default" => FilterGroup::Default,
+            "regional" => FilterGroup::Regional,
+            "ads" => FilterGroup::Ads,
+            "privacy" => FilterGroup::Privacy,
+            "malware" => FilterGroup::Malware,
+            "social" => FilterGroup::Social,
+            _ => unreachable!(),
+        }
+    }
+}
+
+fn merge_builtin_filters(filters: &mut Vec<DefaultFilter>) {
+    let builtins: Vec<DefaultFilter> =
+        serde_json::from_str(include_str!("default_filters.json")).unwrap();
+
+    for builtin in builtins {
+        if let Some(filter) = filters
+            .iter_mut()
+            .find(|filter| filter.file_name == builtin.file_name)
+        {
+            filter.title = builtin.title;
+            filter.group = builtin.group;
+            filter.source_url = builtin.source_url;
+
+            continue;
+        }
+
+        filters.push(builtin);
+    }
 }
 
 fn get_home_directory() -> ConfigurationResult<PathBuf> {
@@ -329,13 +438,39 @@ fn get_home_directory() -> ConfigurationResult<PathBuf> {
 }
 
 async fn get_filter(
-    filter_file_name: &str,
+    filter: &Filter,
     http_client: &reqwest::Client,
 ) -> ConfigurationResult<String> {
-    let base_filters_url = BASE_FILTERS_URL.parse::<Url>().unwrap();
-    let filter_url = base_filters_url.join(filter_file_name).unwrap();
+    if let Some(source_url) = &filter.source_url {
+        match http_client.get(source_url).send().await {
+            Ok(response) => match response.error_for_status() {
+                Ok(response) => return Ok(response.text().await?),
+                Err(err) => {
+                    log::warn!(
+                        "Unable to update filter {} from source url, falling back to registry: {:?}",
+                        filter.title,
+                        err
+                    );
+                }
+            },
+            Err(err) => {
+                log::warn!(
+                    "Unable to update filter {} from source url, falling back to registry: {:?}",
+                    filter.title,
+                    err
+                );
+            }
+        }
+    }
 
-    let response = http_client.get(filter_url.as_str()).send().await?;
+    let base_filters_url = BASE_FILTERS_URL.parse::<Url>().unwrap();
+    let filter_url = base_filters_url.join(&filter.file_name)?;
+
+    let response = http_client
+        .get(filter_url.as_str())
+        .send()
+        .await?
+        .error_for_status()?;
 
     let filter = response.text().await?;
 
@@ -398,6 +533,10 @@ impl ConfigurationUpdater {
             if let Some(configuration) = self.rx.recv().await {
                 self.filters_updater_abort_handle.abort();
 
+                if let Err(err) = configuration.update_filters(self.http_client.clone()).await {
+                    log::error!("An error occured while trying to update filters: {:?}", err);
+                }
+
                 let filters = get_filters_content(&configuration, &self.http_client).await;
 
                 self.adblock_requester.replace_engine(filters).await;
@@ -453,7 +592,18 @@ async fn get_filters_content(
         }
     }
 
-    filters.append(&mut configuration.custom_filters.clone());
+    if !configuration.custom_filters.is_empty() {
+        let custom_filter_list = configuration.custom_filters.join("\n");
+
+        if custom_filter_list
+            .trim_start()
+            .starts_with("[Adblock Plus")
+        {
+            filters.push(custom_filter_list);
+        } else {
+            filters.push(format!("[Adblock Plus 2.0]\n{}", custom_filter_list));
+        }
+    }
 
     filters
 }
