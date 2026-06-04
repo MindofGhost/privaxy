@@ -2,7 +2,7 @@ use crate::{
     blocker::AdblockRequester, ca::make_ca_certificate, proxy::exclusions::LocalExclusionStore,
 };
 use dirs::home_dir;
-use futures::future::{try_join_all, AbortHandle, Abortable};
+use futures::future::{join_all, AbortHandle, Abortable};
 use openssl::{
     pkey::{PKey, Private},
     x509::X509,
@@ -17,6 +17,7 @@ use url::{ParseError, Url};
 
 const BASE_FILTERS_URL: &str = "https://filters.privaxy.net";
 const FILTERS_UPSTREAM_PROXY_ENV: &str = "PRIVAXY_FILTERS_UPSTREAM_PROXY";
+const FILTERS_REQUEST_TIMEOUT_SECONDS_ENV: &str = "PRIVAXY_FILTERS_REQUEST_TIMEOUT_SECONDS";
 const METADATA_FILE_NAME: &str = "metadata.json";
 const CONFIGURATION_DIRECTORY_NAME: &str = ".privaxy";
 const CONFIGURATION_FILE_NAME: &str = "config";
@@ -24,14 +25,18 @@ const FILTERS_DIRECTORY_NAME: &str = "filters";
 
 // Update filters every 10 minutes.
 const FILTERS_UPDATE_AFTER: Duration = Duration::from_secs(60 * 10);
+const FILTERS_REQUEST_TIMEOUT: Duration = Duration::from_secs(60);
 
 type ConfigurationResult<T> = Result<T, ConfigurationError>;
 
 pub(crate) fn build_http_client() -> reqwest::Client {
+    let request_timeout = filters_request_timeout();
+
     let mut client_builder = reqwest::Client::builder()
         .use_rustls_tls()
         .redirect(reqwest::redirect::Policy::none())
         .no_proxy()
+        .timeout(request_timeout)
         .gzip(true)
         .brotli(true)
         .deflate(true);
@@ -53,6 +58,29 @@ pub(crate) fn build_http_client() -> reqwest::Client {
     }
 
     client_builder.build().unwrap()
+}
+
+fn filters_request_timeout() -> Duration {
+    match std::env::var(FILTERS_REQUEST_TIMEOUT_SECONDS_ENV) {
+        Ok(timeout) => match timeout.parse::<u64>() {
+            Ok(0) => {
+                println!(
+                    "Invalid filters request timeout in {}: value must be greater than 0",
+                    FILTERS_REQUEST_TIMEOUT_SECONDS_ENV
+                );
+                std::process::exit(1)
+            }
+            Ok(timeout) => Duration::from_secs(timeout),
+            Err(err) => {
+                println!(
+                    "Invalid filters request timeout in {}: {:?}",
+                    FILTERS_REQUEST_TIMEOUT_SECONDS_ENV, err
+                );
+                std::process::exit(1)
+            }
+        },
+        Err(_) => FILTERS_REQUEST_TIMEOUT,
+    }
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
@@ -337,13 +365,28 @@ impl Configuration {
 
         let futures = self.filters.iter().filter_map(|filter| {
             if filter.enabled {
-                Some(filter.update(&http_client))
+                Some(async {
+                    (
+                        filter.title.clone(),
+                        filter.file_name.clone(),
+                        filter.update(&http_client).await,
+                    )
+                })
             } else {
                 None
             }
         });
 
-        try_join_all(futures).await?;
+        for (title, file_name, result) in join_all(futures).await {
+            if let Err(err) = result {
+                log::error!(
+                    "Unable to update filter {} ({}): {:?}",
+                    title,
+                    file_name,
+                    err
+                );
+            }
+        }
 
         Ok(())
     }

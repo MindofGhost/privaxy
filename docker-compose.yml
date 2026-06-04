@@ -14,6 +14,8 @@ services:
       PRIVAXY_UPSTREAM_PROXY: http://192.168.0.111:8080
       # Use this when you want adblock filter updates to go through another HTTP proxy.
       PRIVAXY_FILTERS_UPSTREAM_PROXY: http://192.168.0.111:8080
+      # Maximum time in seconds for each adblock filter update request.
+      PRIVAXY_FILTERS_REQUEST_TIMEOUT_SECONDS: 60
     ports:
       - "8100:8100"
       - "8110:8110"
