@@ -366,11 +366,6 @@ ADBLOCK_PLUS_SUBSCRIPTIONS = [
     ),
     (
         FilterGroup.REGIONAL,
-        "RU AdList",
-        "https://easylist-downloads.adblockplus.org/advblock.txt",
-    ),
-    (
-        FilterGroup.REGIONAL,
         "Turkish Filters+EasyList",
         "https://easylist-downloads.adblockplus.org/turkish-filters+easylist.txt",
     ),
@@ -550,7 +545,6 @@ ADBLOCK_PLUS_REGIONAL_CODES = {
         ("ROList+EasyList", "ROU"),
         ("ROList", "ROU"),
         ("RuAdList+EasyList", "RUS"),
-        ("RU AdList", "RUS"),
         ("Turkish Filters+EasyList", "TUR"),
         ("Turkish Filters", "TUR"),
         ("Colombian filters by yecarrillo", "COL"),
