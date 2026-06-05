@@ -357,6 +357,13 @@
     "enabled_by_default": true
   },
   {
+    "file_name": "31ba71f6f4f6b71cf491f3a26270402a323298d6fc4434318e84e3f336c5eb83.txt",
+    "source_url": "https://easylist-downloads.adblockplus.org/ruadlist+easylist.txt",
+    "title": "[Ad-PLUS] RUS: RuAdList+EasyList",
+    "group": "regional",
+    "enabled_by_default": true
+  },
+  {
     "file_name": "fe56bbdd5f4587511338b0fa6e6f5216346be60ed4a5505862605ce8393ff088.txt",
     "source_url": "https://raw.githubusercontent.com/hant0508/uBlock-filters/master/filters.txt",
     "title": "RUS: hant0508 additional filters",

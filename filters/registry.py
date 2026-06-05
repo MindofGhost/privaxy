@@ -973,6 +973,13 @@ def get_filters() -> List[Filter]:
         Filter(
             filter_group=FilterGroup.REGIONAL,
             url=FilterUrl(
+                "https://easylist-downloads.adblockplus.org/ruadlist+easylist.txt"
+            ),
+            title="RuAdList+EasyList",
+        ),
+        Filter(
+            filter_group=FilterGroup.REGIONAL,
+            url=FilterUrl(
                 "https://raw.githubusercontent.com/hant0508/uBlock-filters/master/filters.txt"
             ),
             title="RUS: hant0508 additional filters",
